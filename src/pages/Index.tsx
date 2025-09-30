@@ -1,21 +1,16 @@
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
-import Icon from "@/components/ui/icon";
 import { toast } from "@/components/ui/use-toast";
+import Icon from "@/components/ui/icon";
 import KanbanBoard from "@/components/KanbanBoard";
 import ImageCropDialog from "@/components/ImageCropDialog";
 import { EducationDialog, WorkDialog, AchievementDialog } from "@/components/ProfileEditDialogs";
+import { ProfileHeader } from "@/components/profile/ProfileHeader";
+import { ProfileTab } from "@/components/profile/ProfileTab";
+import { DashboardTab } from "@/components/dashboard/DashboardTab";
+import { FinanceTab } from "@/components/finance/FinanceTab";
+import { ProjectsTab } from "@/components/projects/ProjectsTab";
+import { AchievementsTab } from "@/components/achievements/AchievementsTab";
 
 interface Task {
   id: string;
@@ -273,15 +268,6 @@ const Index = () => {
     toast({ title: "Экспорт завершен" });
   };
 
-  const filteredProjects = projects.filter((project) => {
-    const matchesFilter = projectFilter === "all" || 
-      (projectFilter === "active" && project.status === "В разработке") ||
-      (projectFilter === "completed" && project.status === "Завершен");
-    const matchesSearch = project.name.toLowerCase().includes(projectSearch.toLowerCase()) ||
-      project.tech.some(tech => tech.toLowerCase().includes(projectSearch.toLowerCase()));
-    return matchesFilter && matchesSearch;
-  });
-
   const stats = {
     loginStreak: 12,
     totalDays: 45,
@@ -295,103 +281,18 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div 
-        className="h-48 bg-cover bg-center relative"
-        style={{ backgroundImage: `url(${studentData.coverImage})` }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-50"></div>
-      </div>
+      <ProfileHeader 
+        studentData={studentData}
+        stats={stats}
+        editDialogOpen={editDialogOpen}
+        setEditDialogOpen={setEditDialogOpen}
+        editForm={editForm}
+        setEditForm={setEditForm}
+        handleEditProfile={handleEditProfile}
+        handleAvatarUpload={handleAvatarUpload}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 relative z-10">
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <div className="relative">
-              <Avatar className="h-32 w-32 border-4 border-white shadow-lg">
-                <AvatarImage src={studentData.avatar} alt={studentData.firstName} />
-                <AvatarFallback className="text-3xl">{studentData.firstName[0]}{studentData.lastName[0]}</AvatarFallback>
-              </Avatar>
-              <label className="absolute bottom-0 right-0 p-2 bg-primary text-white rounded-full cursor-pointer hover:bg-primary/90 transition-colors">
-                <Icon name="Camera" size={16} />
-                <input type="file" accept="image/*" onChange={handleAvatarUpload} className="hidden" />
-              </label>
-            </div>
-            
-            <div className="flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-3xl font-bold text-gray-900">
-                  {studentData.lastName} {studentData.firstName} {studentData.middleName}
-                </h1>
-                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" size="sm" className="gap-2">
-                      <Icon name="Edit" size={16} />
-                      Редактировать
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Редактировать профиль</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="lastName">Фамилия</Label>
-                        <Input id="lastName" value={editForm.lastName} onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="firstName">Имя</Label>
-                        <Input id="firstName" value={editForm.firstName} onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="middleName">Отчество</Label>
-                        <Input id="middleName" value={editForm.middleName} onChange={(e) => setEditForm({ ...editForm, middleName: e.target.value })} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="birthDate">Дата рождения</Label>
-                        <Input id="birthDate" value={editForm.birthDate} onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="city">Город</Label>
-                        <Input id="city" value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} />
-                      </div>
-                    </div>
-                    <div className="flex justify-end gap-3">
-                      <Button variant="outline" onClick={() => setEditDialogOpen(false)}>Отмена</Button>
-                      <Button onClick={handleEditProfile}>Сохранить</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <Icon name="Calendar" size={16} />
-                  <span>{studentData.birthDate}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Icon name="MapPin" size={16} />
-                  <span>{studentData.city}</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <Card className="bg-primary text-white">
-                <CardContent className="p-4 text-center">
-                  <Icon name="Flame" size={24} className="mx-auto mb-1" />
-                  <div className="text-2xl font-bold">{stats.loginStreak}</div>
-                  <div className="text-xs opacity-90">дней подряд</div>
-                </CardContent>
-              </Card>
-              <Card className="bg-accent text-white">
-                <CardContent className="p-4 text-center">
-                  <Icon name="CheckCircle2" size={24} className="mx-auto mb-1" />
-                  <div className="text-2xl font-bold">{stats.completedTasks}</div>
-                  <div className="text-xs opacity-90">задач выполнено</div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
-
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white shadow-sm p-1 flex-wrap h-auto">
             <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-white">
@@ -421,155 +322,30 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Icon name="GraduationCap" size={20} />
-                      Образование
-                    </CardTitle>
-                    <Button size="sm" variant="outline" onClick={() => { setEditingEdu(null); setEduDialogOpen(true); }}>
-                      <Icon name="Plus" size={16} />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {education.map((edu) => (
-                    <div key={edu.id} className="border-l-2 border-primary pl-4 relative group">
-                      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => { setEditingEdu(edu); setEduDialogOpen(true); }}>
-                          <Icon name="Edit" size={14} />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteEducation(edu.id)} className="text-red-600">
-                          <Icon name="Trash2" size={14} />
-                        </Button>
-                      </div>
-                      <h4 className="font-semibold text-gray-900">{edu.institution}</h4>
-                      <p className="text-sm text-gray-600">{edu.degree} • {edu.field}</p>
-                      <p className="text-xs text-gray-500 mt-1">{edu.years}</p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
-                      <Icon name="Briefcase" size={20} />
-                      Опыт работы
-                    </CardTitle>
-                    <Button size="sm" variant="outline" onClick={() => { setEditingWork(null); setWorkDialogOpen(true); }}>
-                      <Icon name="Plus" size={16} />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {work.map((job) => (
-                    <div key={job.id} className="border-l-2 border-accent pl-4 relative group">
-                      <div className="absolute top-0 right-0 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                        <Button size="sm" variant="ghost" onClick={() => { setEditingWork(job); setWorkDialogOpen(true); }}>
-                          <Icon name="Edit" size={14} />
-                        </Button>
-                        <Button size="sm" variant="ghost" onClick={() => handleDeleteWork(job.id)} className="text-red-600">
-                          <Icon name="Trash2" size={14} />
-                        </Button>
-                      </div>
-                      <h4 className="font-semibold text-gray-900">{job.company}</h4>
-                      <p className="text-sm text-gray-600">{job.position}</p>
-                      <p className="text-xs text-gray-500 mt-1">{job.period}</p>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
-            </div>
+            <ProfileTab 
+              education={education}
+              work={work}
+              onAddEducation={() => { setEditingEdu(null); setEduDialogOpen(true); }}
+              onEditEducation={(edu) => { setEditingEdu(edu); setEduDialogOpen(true); }}
+              onDeleteEducation={handleDeleteEducation}
+              onAddWork={() => { setEditingWork(null); setWorkDialogOpen(true); }}
+              onEditWork={(w) => { setEditingWork(w); setWorkDialogOpen(true); }}
+              onDeleteWork={handleDeleteWork}
+            />
           </TabsContent>
 
           <TabsContent value="dashboard" className="space-y-6">
-            <div className="flex justify-end">
-              <Button onClick={exportToExcel} variant="outline" size="sm" className="gap-2">
-                <Icon name="FileSpreadsheet" size={16} />
-                Экспорт в Excel
-              </Button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-gray-600">Дней активности</p>
-                  <p className="text-3xl font-bold text-primary">{stats.totalDays}</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-gray-600">Прогресс задач</p>
-                  <p className="text-3xl font-bold text-accent">{stats.totalTasks > 0 ? Math.round((stats.completedTasks / stats.totalTasks) * 100) : 0}%</p>
-                  <Progress value={stats.totalTasks > 0 ? (stats.completedTasks / stats.totalTasks) * 100 : 0} className="mt-2" />
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4">
-                  <p className="text-sm text-gray-600">Активные проекты</p>
-                  <p className="text-3xl font-bold">{stats.activeProjects}</p>
-                </CardContent>
-              </Card>
-              <Card className={balance >= 0 ? "bg-green-50" : "bg-red-50"}>
-                <CardContent className="p-4">
-                  <p className="text-sm text-gray-600">Баланс</p>
-                  <p className={`text-3xl font-bold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {balance.toLocaleString()} ₽
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Финансы</CardTitle>
-                    <Select value={financePeriod} onValueChange={setFinancePeriod}>
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="1">1 месяц</SelectItem>
-                        <SelectItem value="3">3 месяца</SelectItem>
-                        <SelectItem value="6">6 месяцев</SelectItem>
-                        <SelectItem value="12">1 год</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-green-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Доходы</p>
-                    <p className="text-lg font-bold text-green-600">{income.toLocaleString()} ₽</p>
-                  </div>
-                  <div className="p-3 bg-red-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Расходы</p>
-                    <p className="text-lg font-bold text-red-600">{expense.toLocaleString()} ₽</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Последние задачи</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {tasks.slice(0, 5).map((task) => (
-                      <div key={task.id} className="flex items-center gap-3">
-                        <Checkbox checked={task.completed} onCheckedChange={() => toggleTask(task.id)} />
-                        <p className={`text-sm ${task.completed ? "line-through text-gray-400" : ""}`}>{task.title}</p>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <DashboardTab 
+              stats={stats}
+              balance={balance}
+              income={income}
+              expense={expense}
+              tasks={tasks}
+              financePeriod={financePeriod}
+              setFinancePeriod={setFinancePeriod}
+              toggleTask={toggleTask}
+              onExport={exportToExcel}
+            />
           </TabsContent>
 
           <TabsContent value="tasks">
@@ -577,161 +353,34 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="finance" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Учет финансов</h2>
-              <Dialog open={transactionDialogOpen} onOpenChange={setTransactionDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button className="gap-2">
-                    <Icon name="Plus" size={16} />
-                    Добавить операцию
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Новая операция</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Тип</Label>
-                      <Select value={newTransaction.type} onValueChange={(value: "income" | "expense") => setNewTransaction({ ...newTransaction, type: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="income">Доход</SelectItem>
-                          <SelectItem value="expense">Расход</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Сумма</Label>
-                      <Input type="number" value={newTransaction.amount} onChange={(e) => setNewTransaction({ ...newTransaction, amount: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Категория</Label>
-                      <Input value={newTransaction.category} onChange={(e) => setNewTransaction({ ...newTransaction, category: e.target.value })} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Дата</Label>
-                      <Input type="date" value={newTransaction.date} onChange={(e) => setNewTransaction({ ...newTransaction, date: e.target.value })} />
-                    </div>
-                  </div>
-                  <div className="flex justify-end gap-3">
-                    <Button variant="outline" onClick={() => setTransactionDialogOpen(false)}>Отмена</Button>
-                    <Button onClick={handleAddTransaction}>Добавить</Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <div className="space-y-3">
-              {getFilteredTransactions().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((transaction) => (
-                <Card key={transaction.id}>
-                  <CardContent className="p-4 flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <div className={`p-3 rounded-full ${transaction.type === "income" ? "bg-green-100" : "bg-red-100"}`}>
-                        <Icon name={transaction.type === "income" ? "TrendingUp" : "TrendingDown"} size={20} className={transaction.type === "income" ? "text-green-600" : "text-red-600"} />
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{transaction.category}</h4>
-                        <p className="text-sm text-gray-500">{transaction.date}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <p className={`text-xl font-bold ${transaction.type === "income" ? "text-green-600" : "text-red-600"}`}>
-                        {transaction.type === "income" ? "+" : "-"}{transaction.amount.toLocaleString()} ₽
-                      </p>
-                      <Button variant="ghost" size="sm" onClick={() => deleteTransaction(transaction.id)} className="text-red-600">
-                        <Icon name="Trash2" size={16} />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <FinanceTab 
+              transactions={getFilteredTransactions()}
+              transactionDialogOpen={transactionDialogOpen}
+              setTransactionDialogOpen={setTransactionDialogOpen}
+              newTransaction={newTransaction}
+              setNewTransaction={setNewTransaction}
+              handleAddTransaction={handleAddTransaction}
+              deleteTransaction={deleteTransaction}
+            />
           </TabsContent>
 
           <TabsContent value="projects" className="space-y-4">
-            <Card>
-              <CardContent className="p-4 flex gap-4">
-                <div className="flex-1">
-                  <Label>Поиск</Label>
-                  <Input placeholder="Название или технология..." value={projectSearch} onChange={(e) => setProjectSearch(e.target.value)} />
-                </div>
-                <div className="w-48">
-                  <Label>Фильтр</Label>
-                  <Select value={projectFilter} onValueChange={setProjectFilter}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Все</SelectItem>
-                      <SelectItem value="active">В разработке</SelectItem>
-                      <SelectItem value="completed">Завершенные</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </CardContent>
-            </Card>
-            
-            {filteredProjects.map((project, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <div className="flex justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-semibold">{project.name}</h3>
-                      <Badge className="mt-2">{project.status}</Badge>
-                    </div>
-                    <span className="text-2xl font-bold text-primary">{project.progress}%</span>
-                  </div>
-                  <Progress value={project.progress} className="mb-4" />
-                  <div className="flex gap-2">
-                    {project.tech.map((tech) => (
-                      <Badge key={tech} variant="outline">{tech}</Badge>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+            <ProjectsTab 
+              projects={projects}
+              projectFilter={projectFilter}
+              setProjectFilter={setProjectFilter}
+              projectSearch={projectSearch}
+              setProjectSearch={setProjectSearch}
+            />
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-2xl font-bold">Достижения</h2>
-              <Button onClick={() => { setEditingAchievement(null); setAchievementDialogOpen(true); }} className="gap-2">
-                <Icon name="Plus" size={16} />
-                Добавить достижение
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {achievements.map((achievement) => (
-                <Card key={achievement.id} className="hover:shadow-lg transition-shadow group">
-                  <CardContent className="p-6">
-                    <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-                      <Button size="sm" variant="ghost" onClick={() => { setEditingAchievement(achievement); setAchievementDialogOpen(true); }}>
-                        <Icon name="Edit" size={14} />
-                      </Button>
-                      <Button size="sm" variant="ghost" onClick={() => handleDeleteAchievement(achievement.id)} className="text-red-600">
-                        <Icon name="Trash2" size={14} />
-                      </Button>
-                    </div>
-                    <div className="flex items-start gap-4">
-                      <div className="p-3 bg-accent/10 rounded-full">
-                        <Icon name={achievement.icon as any} size={24} className="text-accent" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold">{achievement.title}</h4>
-                        <p className="text-sm text-gray-500 mt-1">{achievement.month} {achievement.year}</p>
-                        {achievement.description && (
-                          <p className="text-sm text-gray-600 mt-2">{achievement.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <AchievementsTab 
+              achievements={achievements}
+              onAdd={() => { setEditingAchievement(null); setAchievementDialogOpen(true); }}
+              onEdit={(ach) => { setEditingAchievement(ach); setAchievementDialogOpen(true); }}
+              onDelete={handleDeleteAchievement}
+            />
           </TabsContent>
         </Tabs>
       </div>
