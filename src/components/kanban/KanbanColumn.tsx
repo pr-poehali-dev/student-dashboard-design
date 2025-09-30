@@ -3,20 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import { KanbanColumn as ColumnType, KanbanTask } from './types';
+import { KanbanColumn as KanbanColumnType, KanbanTask } from './types';
 import TaskCard from './TaskCard';
 
 interface KanbanColumnProps {
-  column: ColumnType;
+  column: KanbanColumnType;
   index: number;
   tasks: KanbanTask[];
-  onEditColumn: (column: ColumnType) => void;
+  onEditColumn: (column: KanbanColumnType) => void;
   onDeleteColumn: (columnId: string) => void;
   onEditTask: (task: KanbanTask) => void;
   onDeleteTask: (taskId: string) => void;
 }
 
-export const KanbanColumn = ({
+export const KanbanColumnComponent = ({
   column,
   index,
   tasks,
@@ -101,4 +101,4 @@ export const KanbanColumn = ({
   );
 };
 
-export default KanbanColumn;
+export default KanbanColumnComponent;

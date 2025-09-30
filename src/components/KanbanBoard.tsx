@@ -4,7 +4,7 @@ import { toast } from '@/components/ui/use-toast';
 import { KanbanTask, KanbanColumn } from './kanban/types';
 import ColumnDialog from './kanban/ColumnDialog';
 import TaskDialog from './kanban/TaskDialog';
-import KanbanColumn from './kanban/KanbanColumn';
+import KanbanColumnComponent from './kanban/KanbanColumn';
 
 export const KanbanBoard = () => {
   const [columns, setColumns] = useState<KanbanColumn[]>([
@@ -245,7 +245,7 @@ export const KanbanBoard = () => {
               className="flex gap-4 overflow-x-auto pb-4"
             >
               {columns.sort((a, b) => a.order - b.order).map((column, index) => (
-                <KanbanColumn
+                <KanbanColumnComponent
                   key={column.id}
                   column={column}
                   index={index}
