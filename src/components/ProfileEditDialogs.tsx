@@ -13,14 +13,19 @@ interface Education {
   institution: string;
   degree: string;
   field: string;
-  years: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
 }
 
 interface Work {
   id: string;
   company: string;
   position: string;
-  period: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
+  description: string;
 }
 
 interface Achievement {
@@ -49,7 +54,9 @@ export const EducationDialog = ({
     institution: '',
     degree: '',
     field: '',
-    years: ''
+    startYear: '',
+    endYear: '',
+    isCurrent: false
   });
 
   const handleSave = () => {
@@ -80,9 +87,25 @@ export const EducationDialog = ({
             <Label>Специальность</Label>
             <Input value={form.field} onChange={(e) => setForm({ ...form, field: e.target.value })} />
           </div>
-          <div className="space-y-2">
-            <Label>Годы обучения</Label>
-            <Input value={form.years} onChange={(e) => setForm({ ...form, years: e.target.value })} placeholder="2020-2024" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Год начала</Label>
+              <Input type="number" value={form.startYear} onChange={(e) => setForm({ ...form, startYear: e.target.value })} placeholder="2020" />
+            </div>
+            <div className="space-y-2">
+              <Label>Год окончания</Label>
+              <Input type="number" value={form.endYear} onChange={(e) => setForm({ ...form, endYear: e.target.value })} placeholder="2024" disabled={form.isCurrent} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="edu-current"
+              checked={form.isCurrent}
+              onChange={(e) => setForm({ ...form, isCurrent: e.target.checked, endYear: e.target.checked ? '' : form.endYear })}
+              className="rounded"
+            />
+            <Label htmlFor="edu-current" className="cursor-pointer">По настоящее время</Label>
           </div>
         </div>
         <div className="flex justify-end gap-3">
@@ -108,7 +131,10 @@ export const WorkDialog = ({
   const [form, setForm] = useState<Partial<Work>>(work || {
     company: '',
     position: '',
-    period: ''
+    startYear: '',
+    endYear: '',
+    isCurrent: false,
+    description: ''
   });
 
   const handleSave = () => {
@@ -135,9 +161,29 @@ export const WorkDialog = ({
             <Label>Должность *</Label>
             <Input value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Год начала</Label>
+              <Input type="number" value={form.startYear} onChange={(e) => setForm({ ...form, startYear: e.target.value })} placeholder="2023" />
+            </div>
+            <div className="space-y-2">
+              <Label>Год окончания</Label>
+              <Input type="number" value={form.endYear} onChange={(e) => setForm({ ...form, endYear: e.target.value })} placeholder="2024" disabled={form.isCurrent} />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="work-current"
+              checked={form.isCurrent}
+              onChange={(e) => setForm({ ...form, isCurrent: e.target.checked, endYear: e.target.checked ? '' : form.endYear })}
+              className="rounded"
+            />
+            <Label htmlFor="work-current" className="cursor-pointer">По настоящее время</Label>
+          </div>
           <div className="space-y-2">
-            <Label>Период</Label>
-            <Input value={form.period} onChange={(e) => setForm({ ...form, period: e.target.value })} placeholder="2023-настоящее время" />
+            <Label>Описание деятельности</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Чем вы занимались на этой работе..." rows={4} />
           </div>
         </div>
         <div className="flex justify-end gap-3">

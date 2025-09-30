@@ -28,6 +28,8 @@ interface DashboardTabProps {
   setFinancePeriod: (period: string) => void;
   toggleTask: (id: string) => void;
   onExport: () => void;
+  avgDailyExpense: number;
+  savings: number;
 }
 
 export const DashboardTab = ({
@@ -39,7 +41,9 @@ export const DashboardTab = ({
   financePeriod,
   setFinancePeriod,
   toggleTask,
-  onExport
+  onExport,
+  avgDailyExpense,
+  savings
 }: DashboardTabProps) => {
   return (
     <div className="space-y-6">
@@ -98,7 +102,7 @@ export const DashboardTab = ({
               </Select>
             </div>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <div className="p-3 bg-green-50 rounded-lg">
               <p className="text-sm text-gray-600">Доходы</p>
               <p className="text-lg font-bold text-green-600">{income.toLocaleString()} ₽</p>
@@ -106,6 +110,14 @@ export const DashboardTab = ({
             <div className="p-3 bg-red-50 rounded-lg">
               <p className="text-sm text-gray-600">Расходы</p>
               <p className="text-lg font-bold text-red-600">{expense.toLocaleString()} ₽</p>
+            </div>
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-gray-600">Средний расход в день</p>
+              <p className="text-lg font-bold text-blue-600">{avgDailyExpense.toLocaleString()} ₽</p>
+            </div>
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <p className="text-sm text-gray-600">Отложено</p>
+              <p className="text-lg font-bold text-purple-600">{savings.toLocaleString()} ₽</p>
             </div>
           </CardContent>
         </Card>

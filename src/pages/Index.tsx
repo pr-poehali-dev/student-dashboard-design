@@ -21,6 +21,11 @@ interface Task {
   createdAt: string;
 }
 
+interface TransactionCategory {
+  name: string;
+  icon: string;
+}
+
 interface Transaction {
   id: string;
   type: "income" | "expense";
@@ -35,14 +40,19 @@ interface Education {
   institution: string;
   degree: string;
   field: string;
-  years: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
 }
 
 interface Work {
   id: string;
   company: string;
   position: string;
-  period: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
+  description: string;
 }
 
 interface Achievement {
@@ -82,11 +92,11 @@ const Index = () => {
   });
 
   const [education, setEducation] = useState<Education[]>([
-    { id: "1", institution: "МГУ им. М.В. Ломоносова", degree: "Бакалавр", field: "Информатика", years: "2020-2024" }
+    { id: "1", institution: "МГУ им. М.В. Ломоносова", degree: "Бакалавр", field: "Информатика", startYear: "2020", endYear: "2024", isCurrent: false }
   ]);
 
   const [work, setWork] = useState<Work[]>([
-    { id: "1", company: "Tech Solutions", position: "Junior Developer", period: "2023-настоящее время" }
+    { id: "1", company: "Tech Solutions", position: "Junior Developer", startYear: "2023", endYear: "", isCurrent: true, description: "Разработка веб-приложений на React и TypeScript" }
   ]);
 
   const [achievements, setAchievements] = useState<Achievement[]>([
@@ -110,6 +120,17 @@ const Index = () => {
   const [tasks, setTasks] = useState<Task[]>([
     { id: "1", title: "Завершить модуль аутентификации", description: "Реализовать JWT токены", completed: true, createdAt: "2024-01-15" },
     { id: "2", title: "Код-ревью проекта", description: "Проверить pull requests", completed: false, createdAt: "2024-01-16" }
+  ]);
+
+  const [transactionCategories, setTransactionCategories] = useState<TransactionCategory[]>([
+    { name: "Зарплата", icon: "Wallet" },
+    { name: "Обучение", icon: "BookOpen" },
+    { name: "Фриланс", icon: "Code" },
+    { name: "Питание", icon: "UtensilsCrossed" },
+    { name: "Транспорт", icon: "Car" },
+    { name: "Развлечения", icon: "PartyPopper" },
+    { name: "Здоровье", icon: "Heart" },
+    { name: "Другое", icon: "DollarSign" }
   ]);
 
   const [transactions, setTransactions] = useState<Transaction[]>([
@@ -237,6 +258,13 @@ const Index = () => {
     toast({ title: "Транзакция удалена" });
   };
 
+  const handleAddCategory = (category: TransactionCategory) => {
+    if (!transactionCategories.find(c => c.name === category.name)) {
+      setTransactionCategories([...transactionCategories, category]);
+      toast({ title: "Категория добавлена" });
+    }
+  };
+
   const getFilteredTransactions = () => {
     const monthsAgo = parseInt(financePeriod);
     const cutoffDate = new Date();
@@ -248,7 +276,14 @@ const Index = () => {
     const filtered = getFilteredTransactions();
     const income = filtered.filter(t => t.type === "income").reduce((sum, t) => sum + t.amount, 0);
     const expense = filtered.filter(t => t.type === "expense").reduce((sum, t) => sum + t.amount, 0);
-    return { income, expense, balance: income - expense };
+    
+    const monthsAgo = parseInt(financePeriod);
+    const daysInPeriod = monthsAgo * 30;
+    const avgDailyExpense = daysInPeriod > 0 ? Math.round(expense / daysInPeriod) : 0;
+    
+    const savings = Math.max(0, income - expense);
+    
+    return { income, expense, balance: income - expense, avgDailyExpense, savings };
   };
 
   const exportToExcel = () => {
@@ -284,7 +319,7 @@ const Index = () => {
     completedProjects: 7
   };
 
-  const { income, expense, balance } = calculateBalance();
+  const { income, expense, balance, avgDailyExpense, savings } = calculateBalance();
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -303,8 +338,8 @@ const Index = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white shadow-sm p-1 flex-wrap h-auto">
             <TabsTrigger value="profile" className="data-[state=active]:bg-primary data-[state=active]:text-white">
-              <Icon name="User" size={16} className="mr-2" />
-              Профиль
+              <Icon name="GraduationCap" size={16} className="mr-2" />
+              Образование и работа
             </TabsTrigger>
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-primary data-[state=active]:text-white">
               <Icon name="BarChart3" size={16} className="mr-2" />
@@ -356,6 +391,8 @@ const Index = () => {
               setFinancePeriod={setFinancePeriod}
               toggleTask={toggleTask}
               onExport={exportToExcel}
+              avgDailyExpense={avgDailyExpense}
+              savings={savings}
             />
           </TabsContent>
 
@@ -375,6 +412,8 @@ const Index = () => {
               setNewTransaction={setNewTransaction}
               handleAddTransaction={handleAddTransaction}
               deleteTransaction={deleteTransaction}
+              categories={transactionCategories}
+              onAddCategory={handleAddCategory}
             />
           </TabsContent>
 

@@ -7,14 +7,19 @@ interface Education {
   institution: string;
   degree: string;
   field: string;
-  years: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
 }
 
 interface Work {
   id: string;
   company: string;
   position: string;
-  period: string;
+  startYear: string;
+  endYear: string;
+  isCurrent: boolean;
+  description: string;
 }
 
 interface ProfileTabProps {
@@ -65,7 +70,9 @@ export const ProfileTab = ({
               </div>
               <h4 className="font-semibold text-gray-900">{edu.institution}</h4>
               <p className="text-sm text-gray-600">{edu.degree} • {edu.field}</p>
-              <p className="text-xs text-gray-500 mt-1">{edu.years}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {edu.startYear} - {edu.isCurrent ? 'по н.в.' : edu.endYear}
+              </p>
             </div>
           ))}
         </CardContent>
@@ -96,7 +103,12 @@ export const ProfileTab = ({
               </div>
               <h4 className="font-semibold text-gray-900">{job.company}</h4>
               <p className="text-sm text-gray-600">{job.position}</p>
-              <p className="text-xs text-gray-500 mt-1">{job.period}</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {job.startYear} - {job.isCurrent ? 'по н.в.' : job.endYear}
+              </p>
+              {job.description && (
+                <p className="text-sm text-gray-700 mt-2">{job.description}</p>
+              )}
             </div>
           ))}
         </CardContent>
