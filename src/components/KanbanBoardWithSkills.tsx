@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/components/ui/use-toast';
@@ -8,8 +8,14 @@ import TaskDialog from './kanban/TaskDialog';
 import KanbanColumnComponent from './kanban/KanbanColumn';
 import { TaskDetailDialog } from './kanban/TaskDetailDialog';
 import Icon from '@/components/ui/icon';
+import { Skill } from './skills/SkillsTab';
 
-export const KanbanBoard = () => {
+interface KanbanBoardWithSkillsProps {
+  skills: Skill[];
+  onUpdateSkills: (skills: Skill[]) => void;
+}
+
+export const KanbanBoardWithSkills = ({ skills, onUpdateSkills }: KanbanBoardWithSkillsProps) => {
   const [columns, setColumns] = useState<KanbanColumn[]>([
     { id: '0', title: 'Мечты', order: 0, isDeletable: false },
     { id: '1', title: 'В работе', order: 1, isDeletable: true },
@@ -36,10 +42,6 @@ export const KanbanBoard = () => {
       completed: false,
       comments: []
     }
-  ]);
-
-  const [availableSkills, setAvailableSkills] = useState<string[]>([
-    'React', 'JavaScript', 'TypeScript', 'Node.js', 'Python', 'CSS', 'HTML'
   ]);
 
   const [availableTags, setAvailableTags] = useState<string[]>([
@@ -73,6 +75,8 @@ export const KanbanBoard = () => {
     completed: false,
     comments: []
   });
+
+  const availableSkills = skills.map(s => s.name);
 
   const handleAddColumn = () => {
     if (!newColumn.title.trim()) return;
@@ -122,6 +126,18 @@ export const KanbanBoard = () => {
     setNewColumn({ title: '' });
   };
 
+  const addPointsToSkills = (taskSkills: string[], points: number) => {
+    const updatedSkills = skills.map(skill => {
+      if (taskSkills.includes(skill.name)) {
+        const newPoints = skill.points + points;
+        const newLevel = Math.floor(newPoints / 10) + 1;
+        return { ...skill, points: newPoints, level: newLevel };
+      }
+      return skill;
+    });
+    onUpdateSkills(updatedSkills);
+  };
+
   const handleAddTask = () => {
     if (!newTask.title?.trim()) return;
     const task: KanbanTask = {
@@ -164,9 +180,20 @@ export const KanbanBoard = () => {
   };
 
   const handleUpdateTask = (updatedTask: KanbanTask) => {
+    const oldTask = tasks.find(t => t.id === updatedTask.id);
+    
+    if (oldTask && !oldTask.completed && updatedTask.completed) {
+      addPointsToSkills(updatedTask.skills, updatedTask.points);
+      toast({ 
+        title: 'Задача выполнена! 🎉', 
+        description: `+${updatedTask.points} баллов к навыкам: ${updatedTask.skills.join(', ')}`
+      });
+    }
+    
     setTasks(tasks.map(task => 
       task.id === updatedTask.id ? updatedTask : task
     ));
+    
     if (selectedTask?.id === updatedTask.id) {
       setSelectedTask(updatedTask);
     }
@@ -204,15 +231,19 @@ export const KanbanBoard = () => {
     
     const updatedTask = { ...task, completed: !task.completed };
     handleUpdateTask(updatedTask);
-    
-    if (updatedTask.completed) {
-      toast({ title: 'Задача выполнена! 🎉' });
-    }
   };
 
   const handleAddSkill = (skill: string) => {
-    if (!availableSkills.includes(skill)) {
-      setAvailableSkills([...availableSkills, skill]);
+    const existingSkill = skills.find(s => s.name === skill);
+    if (!existingSkill) {
+      const newSkill: Skill = {
+        id: Date.now().toString(),
+        name: skill,
+        type: 'hard',
+        points: 0,
+        level: 1
+      };
+      onUpdateSkills([...skills, newSkill]);
     }
   };
 
@@ -370,4 +401,4 @@ export const KanbanBoard = () => {
   );
 };
 
-export default KanbanBoard;
+export default KanbanBoardWithSkills;

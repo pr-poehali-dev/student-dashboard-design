@@ -1,3 +1,12 @@
+export interface TaskComment {
+  id: string;
+  author: string;
+  text: string;
+  file?: string;
+  fileName?: string;
+  timestamp: string;
+}
+
 export interface KanbanTask {
   id: string;
   title: string;
@@ -16,6 +25,9 @@ export interface KanbanTask {
   skills: string[];
   creator: string;
   columnId: string;
+  tags?: string[];
+  completed?: boolean;
+  comments?: TaskComment[];
 }
 
 export interface KanbanColumn {

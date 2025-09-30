@@ -14,6 +14,9 @@ interface KanbanColumnProps {
   onDeleteColumn: (columnId: string) => void;
   onEditTask: (task: KanbanTask) => void;
   onDeleteTask: (taskId: string) => void;
+  onAddTask: (columnId: string) => void;
+  onTaskClick: (task: KanbanTask) => void;
+  onToggleTaskComplete: (taskId: string) => void;
 }
 
 export const KanbanColumnComponent = ({
@@ -23,7 +26,10 @@ export const KanbanColumnComponent = ({
   onEditColumn,
   onDeleteColumn,
   onEditTask,
-  onDeleteTask
+  onDeleteTask,
+  onAddTask,
+  onTaskClick,
+  onToggleTaskComplete
 }: KanbanColumnProps) => {
   return (
     <Draggable key={column.id} draggableId={column.id} index={index}>
@@ -84,6 +90,8 @@ export const KanbanColumnComponent = ({
                               task={task}
                               onEdit={onEditTask}
                               onDelete={onDeleteTask}
+                              onClick={onTaskClick}
+                              onToggleComplete={onToggleTaskComplete}
                             />
                           </div>
                         )}
@@ -93,6 +101,14 @@ export const KanbanColumnComponent = ({
                   </div>
                 )}
               </Droppable>
+              <Button
+                variant="ghost"
+                className="w-full mt-2 justify-start text-gray-600"
+                onClick={() => onAddTask(column.id)}
+              >
+                <Icon name="Plus" size={16} className="mr-2" />
+                Добавить задачу
+              </Button>
             </CardContent>
           </Card>
         </div>

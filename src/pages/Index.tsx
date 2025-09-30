@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/use-toast";
 import Icon from "@/components/ui/icon";
-import KanbanBoard from "@/components/KanbanBoard";
+import KanbanBoardWithSkills from "@/components/KanbanBoardWithSkills";
 import ImageCropDialog from "@/components/ImageCropDialog";
 import { EducationDialog, WorkDialog, AchievementDialog } from "@/components/ProfileEditDialogs";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
@@ -11,6 +11,7 @@ import { DashboardTab } from "@/components/dashboard/DashboardTab";
 import { FinanceTab } from "@/components/finance/FinanceTab";
 import { ProjectsTab } from "@/components/projects/ProjectsTab";
 import { AchievementsTab } from "@/components/achievements/AchievementsTab";
+import { SkillsTab, Skill } from "@/components/skills/SkillsTab";
 
 interface Task {
   id: string;
@@ -92,6 +93,12 @@ const Index = () => {
     { id: "1", title: "Победитель хакатона 2023", month: "Ноябрь", year: "2023", description: "Первое место в университетском хакатоне", icon: "Trophy" },
     { id: "2", title: "Сертификат React Developer", month: "Сентябрь", year: "2023", description: "Завершил курс по React", icon: "Award" },
     { id: "3", title: "Top Student Award", month: "Июнь", year: "2023", description: "Лучший студент курса", icon: "Medal" }
+  ]);
+
+  const [skills, setSkills] = useState<Skill[]>([
+    { id: "1", name: "React", type: "hard", points: 15, level: 2 },
+    { id: "2", name: "JavaScript", type: "hard", points: 22, level: 3 },
+    { id: "3", name: "Коммуникация", type: "soft", points: 8, level: 1 }
   ]);
 
   const [projects] = useState([
@@ -319,6 +326,10 @@ const Index = () => {
               <Icon name="Trophy" size={16} className="mr-2" />
               Достижения
             </TabsTrigger>
+            <TabsTrigger value="skills" className="data-[state=active]:bg-primary data-[state=active]:text-white">
+              <Icon name="Brain" size={16} className="mr-2" />
+              Навыки
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
@@ -349,7 +360,10 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="tasks">
-            <KanbanBoard />
+            <KanbanBoardWithSkills 
+              skills={skills}
+              onUpdateSkills={setSkills}
+            />
           </TabsContent>
 
           <TabsContent value="finance" className="space-y-4">
@@ -380,6 +394,13 @@ const Index = () => {
               onAdd={() => { setEditingAchievement(null); setAchievementDialogOpen(true); }}
               onEdit={(ach) => { setEditingAchievement(ach); setAchievementDialogOpen(true); }}
               onDelete={handleDeleteAchievement}
+            />
+          </TabsContent>
+
+          <TabsContent value="skills" className="space-y-4">
+            <SkillsTab 
+              skills={skills}
+              onUpdateSkills={setSkills}
             />
           </TabsContent>
         </Tabs>
