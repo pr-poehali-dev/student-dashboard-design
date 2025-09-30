@@ -4,12 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Icon from "@/components/ui/icon";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("profile");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [projectFilter, setProjectFilter] = useState("all");
+  const [projectSearch, setProjectSearch] = useState("");
 
-  const studentData = {
+  const [studentData, setStudentData] = useState({
     lastName: "Иванов",
     firstName: "Алексей",
     middleName: "Сергеевич",
@@ -33,7 +41,29 @@ const Index = () => {
       { name: "Mobile App", status: "Завершен", progress: 100, tech: ["React Native"] },
       { name: "AI Chatbot", status: "В разработке", progress: 45, tech: ["Python", "TensorFlow"] }
     ]
+  });
+
+  const [editForm, setEditForm] = useState({
+    firstName: studentData.firstName,
+    lastName: studentData.lastName,
+    middleName: studentData.middleName,
+    birthDate: studentData.birthDate,
+    city: studentData.city
+  });
+
+  const handleEditProfile = () => {
+    setStudentData({ ...studentData, ...editForm });
+    setEditDialogOpen(false);
   };
+
+  const filteredProjects = studentData.projects.filter((project) => {
+    const matchesFilter = projectFilter === "all" || 
+      (projectFilter === "active" && project.status === "В разработке") ||
+      (projectFilter === "completed" && project.status === "Завершен");
+    const matchesSearch = project.name.toLowerCase().includes(projectSearch.toLowerCase()) ||
+      project.tech.some(tech => tech.toLowerCase().includes(projectSearch.toLowerCase()));
+    return matchesFilter && matchesSearch;
+  });
 
   const stats = {
     loginStreak: 12,
@@ -81,9 +111,77 @@ const Index = () => {
             </Avatar>
             
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900">
-                {studentData.lastName} {studentData.firstName} {studentData.middleName}
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-gray-900">
+                  {studentData.lastName} {studentData.firstName} {studentData.middleName}
+                </h1>
+                <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" size="sm" className="gap-2">
+                      <Icon name="Edit" size={16} />
+                      Редактировать
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Редактировать профиль</DialogTitle>
+                      <DialogDescription>
+                        Измените информацию о себе
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="lastName">Фамилия</Label>
+                        <Input
+                          id="lastName"
+                          value={editForm.lastName}
+                          onChange={(e) => setEditForm({ ...editForm, lastName: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="firstName">Имя</Label>
+                        <Input
+                          id="firstName"
+                          value={editForm.firstName}
+                          onChange={(e) => setEditForm({ ...editForm, firstName: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="middleName">Отчество</Label>
+                        <Input
+                          id="middleName"
+                          value={editForm.middleName}
+                          onChange={(e) => setEditForm({ ...editForm, middleName: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="birthDate">Дата рождения</Label>
+                        <Input
+                          id="birthDate"
+                          value={editForm.birthDate}
+                          onChange={(e) => setEditForm({ ...editForm, birthDate: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="city">Город</Label>
+                        <Input
+                          id="city"
+                          value={editForm.city}
+                          onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3">
+                      <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+                        Отмена
+                      </Button>
+                      <Button onClick={handleEditProfile}>
+                        Сохранить
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
               <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
                   <Icon name="Calendar" size={16} />
@@ -255,7 +353,49 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="projects" className="space-y-4">
-            {studentData.projects.map((project, index) => (
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <Label htmlFor="search" className="text-sm font-medium mb-2 block">Поиск</Label>
+                    <div className="relative">
+                      <Icon name="Search" size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <Input
+                        id="search"
+                        placeholder="Название проекта или технология..."
+                        value={projectSearch}
+                        onChange={(e) => setProjectSearch(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+                  <div className="w-full md:w-48">
+                    <Label htmlFor="filter" className="text-sm font-medium mb-2 block">Фильтр</Label>
+                    <Select value={projectFilter} onValueChange={setProjectFilter}>
+                      <SelectTrigger id="filter">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Все проекты</SelectItem>
+                        <SelectItem value="active">В разработке</SelectItem>
+                        <SelectItem value="completed">Завершенные</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {filteredProjects.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Icon name="FolderX" size={48} className="mx-auto mb-4 text-gray-300" />
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Проекты не найдены</h3>
+                  <p className="text-sm text-gray-500">Попробуйте изменить параметры поиска</p>
+                </CardContent>
+              </Card>
+            ) : (
+              filteredProjects.map((project, index) => (
               <Card key={index}>
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
@@ -277,7 +417,8 @@ const Index = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              ))
+            )}
           </TabsContent>
 
           <TabsContent value="achievements" className="space-y-4">
